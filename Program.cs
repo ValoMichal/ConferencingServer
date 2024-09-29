@@ -63,7 +63,7 @@ namespace ConferencingServer
                                     users.Add(new User(users.Count, input[1], client.Address.ToString()));
                                 }
                                 break;
-                            case "changeName":
+                            case "rename":
                                 foreach (User user in users)
                                 {
                                     if (user.ip.Equals(client.Address.ToString()))
@@ -103,8 +103,10 @@ namespace ConferencingServer
                                 if (user.name.Equals(input[1]))
                                 {
                                     users.Remove(user);
+                                    Console.WriteLine("kicked " + input[1]);
                                 }
                             }
+                            Console.WriteLine("if you havent received kick confirmation you propably miss spelled the name");
                             break;
                         case "ban":
                             foreach (User user in users)
@@ -113,10 +115,13 @@ namespace ConferencingServer
                                 {
                                     banned.Add(user.ip);
                                     users.Remove(user);
+                                    Console.WriteLine("banned " + input[1]);
                                 }
                             }
+                            Console.WriteLine("if you havent received ban confirmation you propably miss spelled the name");
                             break;
                         case "close":
+                            Console.WriteLine("closing");
                             Environment.Exit(Environment.ExitCode);
                             break;
                         default:
