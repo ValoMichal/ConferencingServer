@@ -36,10 +36,14 @@ namespace ConferencingServer
         private static UdpClient comms = new UdpClient(5000);
         private static IPEndPoint client = new IPEndPoint(IPAddress.Any, 0);
         private static List<User> users = new List<User>();
+        private static List<string> banned = new List<string>();
         static void Main(string[] args)
         {
             Console.WriteLine("Hello, World!");
             Host();
+            Cli();
+            Start();
+            //turn on upstream and downstream
         }
         private static void Host()
         {
@@ -53,9 +57,11 @@ namespace ConferencingServer
                         switch (input[0])
                         {
                             case "connect":
-                                comms.Send(Encoding.ASCII.GetBytes(users.Count.ToString()),users.Count.ToString().Length,client.Address.ToString(),5000);
-                                users.Add(new User(users.Count, input[1], client.Address.ToString()));
-                                //add new upstream/downstream channels
+                                if (!banned.Contains(client.Address.ToString()))
+                                {
+                                    comms.Send(Encoding.ASCII.GetBytes(users.Count.ToString()), users.Count.ToString().Length, client.Address.ToString(), 5000);
+                                    users.Add(new User(users.Count, input[1], client.Address.ToString()));
+                                }
                                 break;
                             case "changeName":
                                 foreach (User user in users)
@@ -71,17 +77,9 @@ namespace ConferencingServer
                                 break;
                         }
                         //string sendText = string.Join(Environment.NewLine, output);
-                        //connect.Connect(users[users.Count - 1], 5001 + users.Count * 3);
-                        string sendThis = (5001 + users.Count * 3).ToString();
-                        byte[] output = Encoding.ASCII.GetBytes(sendThis);
-                        connect.Send(output, output.Length, users[users.Count - 1], 5000);
-                        this.Dispatcher.Invoke(() =>
-                        {
-                            ChatAdd(sender, e, dataText + " connected.");
-                        });
-                        Task.Run(() => VideoDown(null, null));
-                        Task.Run(() => AudioDown(null, null));
-                        Task.Run(() => ChatDown(null, null));
+                        //string sendThis = (5001 + users.Count * 3).ToString();
+                        //byte[] output = Encoding.ASCII.GetBytes(sendThis);
+                        //connect.Send(output, output.Length, users[users.Count - 1], 5000);
                     }
                     catch (Exception ex)
                     {
@@ -89,6 +87,51 @@ namespace ConferencingServer
                     }
                 }
             });
+        }
+        private static void Cli()
+        {
+            Task.Run(() =>
+            {
+                while (true)
+                {
+                    List<string> input = Console.ReadLine().Split(" ").ToList();
+                    switch(input[0])
+                    {
+                        case "kick":
+                            foreach (User user in users)
+                            {
+                                if (user.name.Equals(input[1]))
+                                {
+                                    users.Remove(user);
+                                }
+                            }
+                            break;
+                        case "ban":
+                            foreach (User user in users)
+                            {
+                                if (user.name.Equals(input[1]))
+                                {
+                                    banned.Add(user.ip);
+                                    users.Remove(user);
+                                }
+                            }
+                            break;
+                        case "close":
+                            Environment.Exit(Environment.ExitCode);
+                            break;
+                        default:
+                            Console.WriteLine("Unknown command. Try kick, ban or close");
+                            break;
+                    }
+                }
+            });
+        }
+        private static void Start()
+        {
+            while (true)
+            {
+
+            }
         }
     }
 }
