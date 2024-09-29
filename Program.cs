@@ -2,17 +2,23 @@
 using System.Text;
 using System.Xml.Linq;
 using System;
+using System.Net.Sockets;
+using System.Net;
 
 namespace ConferencingServer
 {
     internal class Program
     {
+        UdpClient comms = new UdpClient(5000);
+        private static IPEndPoint client = new IPEndPoint(IPAddress.Any, 0);
+        private static Dictionary<int,string> users = new Dictionary<int,string>();
+        private static Dictionary<int, string> names = new Dictionary<int, string>();
         static void Main(string[] args)
         {
             Console.WriteLine("Hello, World!");
             Host();
         }
-        private void Host()
+        private static void Host()
         {
             Task.Run(() =>
             {
