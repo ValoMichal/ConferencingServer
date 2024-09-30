@@ -60,10 +60,27 @@ namespace ConferencingServer
                                 if (!banned.Contains(client.Address.ToString()))
                                 {
                                     comms.Send(Encoding.ASCII.GetBytes(users.Count.ToString()), users.Count.ToString().Length, client.Address.ToString(), 5000);
+                                    again1:
+                                    foreach (User user in users)
+                                    {
+                                        if (user.name.Equals(input[1])){
+                                            input[1] += "1";
+                                            goto again1;
+                                        }
+                                    }
                                     users.Add(new User(users.Count, input[1], client.Address.ToString()));
                                 }
                                 break;
                             case "rename":
+                                again2:
+                                foreach (User user in users)
+                                {
+                                    if (user.name.Equals(input[1]))
+                                    {
+                                        input[1] += "1";
+                                        goto again2;
+                                    }
+                                }
                                 foreach (User user in users)
                                 {
                                     if (user.ip.Equals(client.Address.ToString()))
@@ -98,27 +115,39 @@ namespace ConferencingServer
                     switch(input[0])
                     {
                         case "kick":
-                            foreach (User user in users)
+                            if (users.Any(user => user.name.Equals(input[1])))
                             {
-                                if (user.name.Equals(input[1]))
+                                foreach (User user in users)
                                 {
-                                    users.Remove(user);
-                                    Console.WriteLine("kicked " + input[1]);
+                                    if (user.name.Equals(input[1]))
+                                    {
+                                        users.Remove(user);
+                                        Console.WriteLine("kicked " + input[1]);
+                                    }
                                 }
                             }
-                            Console.WriteLine("if you havent received kick confirmation you propably miss spelled the name");
+                            else
+                            {
+                                Console.WriteLine("no such user");
+                            }
                             break;
                         case "ban":
-                            foreach (User user in users)
+                            if (users.Any(user => user.name.Equals(input[1])))
                             {
-                                if (user.name.Equals(input[1]))
+                                foreach (User user in users)
                                 {
-                                    banned.Add(user.ip);
-                                    users.Remove(user);
-                                    Console.WriteLine("banned " + input[1]);
+                                    if (user.name.Equals(input[1]))
+                                    {
+                                        banned.Add(user.ip);
+                                        users.Remove(user);
+                                        Console.WriteLine("banned " + input[1]);
+                                    }
                                 }
                             }
-                            Console.WriteLine("if you havent received ban confirmation you propably miss spelled the name");
+                            else
+                            {
+                                Console.WriteLine("no such user");
+                            }
                             break;
                         case "close":
                             Console.WriteLine("closing");
